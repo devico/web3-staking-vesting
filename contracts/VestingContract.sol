@@ -22,17 +22,19 @@ contract VestingContract is Ownable {
     event DistributedRights(address indexed account, uint256 amount);
     event TokensWithdrawn(address indexed account, uint256 amount);
 
+    error ZeroAddress();
+    error InvalidAmount(uint256 amount);
+    error DistributionNotOver();
+    error InvalidAvailableAmount(uint256 availableAmount);
+    error InvalidRemainingAmount(uint256 remainingAmount);
+
     /**
      * @dev Constructor to initialize the VestingContract.
      * @param _token Address of the ERC20 token contract.
      * @param _startTime Start time of the distribution phase.
      * @param _endTime End time of the distribution phase.
      */
-    constructor(
-        address _token,
-        uint256 _startTime,
-        uint256 _endTime
-    ) {
+    constructor(address _token, uint256 _startTime, uint256 _endTime) {
         token = IERC20(_token);
         startTime = _startTime;
         endTime = _endTime;
@@ -42,7 +44,10 @@ contract VestingContract is Ownable {
      * @dev Modifier to check if the current timestamp is within the distribution phase.
      */
     modifier duringDistributionPhase() {
-        require(block.timestamp >= startTime && block.timestamp <= endTime, "Distribution phase is over");
+        require(
+            block.timestamp >= startTime && block.timestamp <= endTime,
+            "Distribution phase is over"
+        );
         _;
     }
 
@@ -51,9 +56,17 @@ contract VestingContract is Ownable {
      * @param account The address to receive the rights.
      * @param amount The amount of rights to be distributed.
      */
-    function distributeRights(address account, uint256 amount) external onlyOwner duringDistributionPhase {
-        require(account != address(0), "Invalid address");
-        require(amount > 0, "Amount must be greater than 0");
+    function distributeRights(
+        address account,
+        uint256 amount
+    ) external onlyOwner duringDistributionPhase {
+        if (account == address(0)) {
+            revert ZeroAddress();
+        }
+
+        if (amount == 0) {
+            revert InvalidAmount(amount);
+        }
 
         rights[account] += amount;
         emit DistributedRights(account, amount);
@@ -65,6 +78,10 @@ contract VestingContract is Ownable {
      * @return The amount of tokens available for withdrawal.
      */
     function getAvailableAmount(address _address) public view returns (uint256) {
+        if (_address == address(0)) {
+            revert ZeroAddress();
+        }
+
         uint256 unlockedPercentage = 0;
 
         for (uint256 i = 0; i < unlockStages.length; i++) {
@@ -76,6 +93,7 @@ contract VestingContract is Ownable {
         }
 
         uint256 unlockableAmount = (rights[_address] * unlockedPercentage) / 100;
+
         return unlockableAmount;
     }
 
@@ -83,14 +101,23 @@ contract VestingContract is Ownable {
      * @dev Function to withdraw available tokens by an account after the distribution phase.
      */
     function withdrawTokens() external {
-        require(block.timestamp > endTime, "Distribution phase is not over yet");
+        if (block.timestamp < endTime) {
+            revert DistributionNotOver();
+        }
+
         uint256 availableAmount = getAvailableAmount(msg.sender);
 
-        require(availableAmount > 0, "No tokens available for withdrawal");
+        if (availableAmount == 0) {
+            revert InvalidAvailableAmount(availableAmount);
+        }
 
-        rights[msg.sender] -= availableAmount;
-        token.transfer(msg.sender, availableAmount);
+        uint256 remainingAmount = availableAmount - lastUnlockedStage[msg.sender];
 
-        emit TokensWithdrawn(msg.sender, availableAmount);
+        lastUnlockedStage[msg.sender] = availableAmount;
+
+        rights[msg.sender] -= remainingAmount;
+        token.transfer(msg.sender, remainingAmount);
+
+        emit TokensWithdrawn(msg.sender, remainingAmount);
     }
 }

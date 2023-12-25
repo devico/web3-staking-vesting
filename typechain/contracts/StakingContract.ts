@@ -32,14 +32,14 @@ export interface StakingContractInterface extends utils.Interface {
     "claimRewards()": FunctionFragment;
     "deposit(uint256)": FunctionFragment;
     "depositToken()": FunctionFragment;
-    "deposits(address)": FunctionFragment;
-    "lastDepositTime(address)": FunctionFragment;
     "lockPeriod()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "rewardPercentage()": FunctionFragment;
     "rewardToken()": FunctionFragment;
+    "stakingStartTime()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "users(address)": FunctionFragment;
     "withdraw()": FunctionFragment;
   };
 
@@ -48,14 +48,14 @@ export interface StakingContractInterface extends utils.Interface {
       | "claimRewards"
       | "deposit"
       | "depositToken"
-      | "deposits"
-      | "lastDepositTime"
       | "lockPeriod"
       | "owner"
       | "renounceOwnership"
       | "rewardPercentage"
       | "rewardToken"
+      | "stakingStartTime"
       | "transferOwnership"
+      | "users"
       | "withdraw"
   ): FunctionFragment;
 
@@ -70,14 +70,6 @@ export interface StakingContractInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "depositToken",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "deposits",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "lastDepositTime",
-    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "lockPeriod",
@@ -97,7 +89,15 @@ export interface StakingContractInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "stakingStartTime",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "users",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
@@ -109,11 +109,6 @@ export interface StakingContractInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "depositToken",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "deposits", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "lastDepositTime",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "lockPeriod", data: BytesLike): Result;
@@ -131,9 +126,14 @@ export interface StakingContractInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "stakingStartTime",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "users", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
@@ -233,16 +233,6 @@ export interface StakingContract extends BaseContract {
 
     depositToken(overrides?: CallOverrides): Promise<[string]>;
 
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    lastDepositTime(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     lockPeriod(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
@@ -255,10 +245,23 @@ export interface StakingContract extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<[string]>;
 
+    stakingStartTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    users(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, boolean] & {
+        depositAmount: BigNumber;
+        lastDepositTime: BigNumber;
+        claimed: boolean;
+      }
+    >;
 
     withdraw(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -276,16 +279,6 @@ export interface StakingContract extends BaseContract {
 
   depositToken(overrides?: CallOverrides): Promise<string>;
 
-  deposits(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  lastDepositTime(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   lockPeriod(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
@@ -298,10 +291,23 @@ export interface StakingContract extends BaseContract {
 
   rewardToken(overrides?: CallOverrides): Promise<string>;
 
+  stakingStartTime(overrides?: CallOverrides): Promise<BigNumber>;
+
   transferOwnership(
     newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  users(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, BigNumber, boolean] & {
+      depositAmount: BigNumber;
+      lastDepositTime: BigNumber;
+      claimed: boolean;
+    }
+  >;
 
   withdraw(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -317,16 +323,6 @@ export interface StakingContract extends BaseContract {
 
     depositToken(overrides?: CallOverrides): Promise<string>;
 
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    lastDepositTime(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     lockPeriod(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
@@ -337,10 +333,23 @@ export interface StakingContract extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<string>;
 
+    stakingStartTime(overrides?: CallOverrides): Promise<BigNumber>;
+
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    users(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, BigNumber, boolean] & {
+        depositAmount: BigNumber;
+        lastDepositTime: BigNumber;
+        claimed: boolean;
+      }
+    >;
 
     withdraw(overrides?: CallOverrides): Promise<void>;
   };
@@ -397,16 +406,6 @@ export interface StakingContract extends BaseContract {
 
     depositToken(overrides?: CallOverrides): Promise<BigNumber>;
 
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    lastDepositTime(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     lockPeriod(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -419,9 +418,16 @@ export interface StakingContract extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<BigNumber>;
 
+    stakingStartTime(overrides?: CallOverrides): Promise<BigNumber>;
+
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    users(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     withdraw(
@@ -441,16 +447,6 @@ export interface StakingContract extends BaseContract {
 
     depositToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    deposits(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    lastDepositTime(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     lockPeriod(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -463,9 +459,16 @@ export interface StakingContract extends BaseContract {
 
     rewardToken(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    stakingStartTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    users(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     withdraw(

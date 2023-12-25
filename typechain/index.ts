@@ -12,6 +12,8 @@ export type { IERC20Permit } from "./@openzeppelin/contracts/token/ERC20/extensi
 export { IERC20Permit__factory } from "./factories/@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit__factory";
 export type { IERC20 } from "./@openzeppelin/contracts/token/ERC20/IERC20";
 export { IERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/IERC20__factory";
+export type { ERC20 } from "./contracts/Erc.sol/ERC20";
+export { ERC20__factory } from "./factories/contracts/Erc.sol/ERC20__factory";
 export type { StakingContract } from "./contracts/StakingContract";
 export { StakingContract__factory } from "./factories/contracts/StakingContract__factory";
 export type { VestingContract } from "./contracts/VestingContract";
